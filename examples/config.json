@@ -1,7 +1,7 @@
 {
   "type": "multires",
   "multiRes": {
-    "basePath": ".",
+    "basePath": "multires",
     "path": "/%l/%s%y_%x",
     "extension": "jpg",
     "tileResolution": 512,

@@ -2,79 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>360 Multi-Res Viewer</title>
+  <title>Multi-Res 360 Viewer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.css" />
   <style>
     html, body {
       margin: 0;
       height: 100%;
-      font-family: sans-serif;
       background: #000;
+      font-family: sans-serif;
     }
-    #controls {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 999;
-      background: rgba(255, 255, 255, 0.9);
-      padding: 10px;
-      border-radius: 6px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
-    }
-    #configUrl {
-      width: 400px;
-      padding: 6px;
-      font-size: 14px;
-    }
-    #loadBtn {
-      padding: 6px 10px;
-      font-size: 14px;
-      margin-left: 6px;
-    }
+
     #panorama {
       width: 100%;
       height: 100%;
+    }
+
+    #controls {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 9999;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #configUrl {
+      width: 400px;
+      padding: 6px;
+    }
+
+    #recentUrls {
+      width: 400px;
+      padding: 6px;
+    }
+
+    #loadBtn {
+      padding: 6px;
+    }
+
+    label {
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
 
 <div id="controls">
-  <input id="configUrl" type="text" placeholder="Enter config.json URL" />
+  <label for="configUrl">Enter config.json URL</label>
+  <input id="configUrl" type="text" placeholder="https://example.com/config.json" />
   <button id="loadBtn">Load Viewer</button>
+
+  <label for="recentUrls">Recent URLs</label>
+  <select id="recentUrls">
+    <option disabled selected>Select a recent URL</option>
+  </select>
 </div>
+
 <div id="panorama"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.js"></script>
 <script>
+  const input = document.getElementById('configUrl');
+  const loadBtn = document.getElementById('loadBtn');
+  const recentSelect = document.getElementById('recentUrls');
   let viewer;
 
-  document.getElementById('loadBtn').addEventListener('click', async () => {
-    const url = document.getElementById('configUrl').value.trim();
-    if (!url) {
-      alert("Please enter a valid config.json URL.");
-      return;
-    }
+  function saveRecentUrl(url) {
+    let list = JSON.parse(localStorage.getItem('recentUrls') || '[]');
+    list = list.filter(u => u !== url); // 중복 제거
+    list.unshift(url); // 최신 URL 맨 위로
+    list = list.slice(0, 10); // 최대 10개 유지
+    localStorage.setItem('recentUrls', JSON.stringify(list));
+    renderRecentList();
+  }
 
+  function renderRecentList() {
+    const list = JSON.parse(localStorage.getItem('recentUrls') || '[]');
+    recentSelect.innerHTML = '<option disabled selected>Select a recent URL</option>';
+    list.forEach(url => {
+      const option = document.createElement('option');
+      option.value = url;
+      option.textContent = url;
+      recentSelect.appendChild(option);
+    });
+  }
+
+  async function loadViewer(url) {
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error('Network error or invalid URL');
-
-      const config = await response.json();
+      const res = await fetch(url);
+      const config = await res.json();
       if (viewer) viewer.destroy();
-
       viewer = pannellum.viewer('panorama', config);
+      saveRecentUrl(url);
     } catch (err) {
       console.error(err);
-      alert("Failed to load config.json. Please check the URL and CORS policy.");
+      alert("Failed to load config.json. Check the URL or CORS.");
     }
+  }
+
+  loadBtn.addEventListener('click', () => {
+    const url = input.value.trim();
+    if (url) loadViewer(url);
   });
 
-  // Optionally, pre-load a default config
-  // window.onload = () => {
-  //   document.getElementById('configUrl').value = 'https://minogram.github.io/fast-pano-view/examples/multires/config.json';
-  //   document.getElementById('loadBtn').click();
-  // };
+  recentSelect.addEventListener('change', () => {
+    const url = recentSelect.value;
+    input.value = url;
+    loadViewer(url);
+  });
+
+  // 초기화
+  renderRecentList();
 </script>
 
 </body>
