@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Multi-Res 360 Viewer</title>
+  <title>Pannellum Debug Viewer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.css" />
   <style>
     html, body {
@@ -44,10 +44,10 @@
 
     #errorBox {
       position: fixed;
-      top: 20px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: rgba(255, 0, 0, 0.85);
+      background-color: rgba(255, 0, 0, 0.9);
       color: white;
       padding: 10px 20px;
       border-radius: 8px;
@@ -55,7 +55,8 @@
       font-size: 14px;
       z-index: 10000;
       display: none;
-      white-space: pre-wrap;
+      max-width: 90%;
+      word-break: break-word;
     }
 
     label {
@@ -121,35 +122,7 @@
 
   async function loadViewer(url) {
     hideError();
-
     try {
       const res = await fetch(url);
-      if (!res.ok) throw new Error(`Failed to fetch config.json (${res.status})`);
-      const config = await res.json();
-
-      if (viewer) viewer.destroy();
-      viewer = pannellum.viewer('panorama', config);
-
-      viewer.on('error', msg => showError(msg));
-      saveRecentUrl(url);
-    } catch (err) {
-      showError(err.message);
-    }
-  }
-
-  loadBtn.addEventListener('click', () => {
-    const url = input.value.trim();
-    if (url) loadViewer(url);
-  });
-
-  recentSelect.addEventListener('change', () => {
-    const url = recentSelect.value;
-    input.value = url;
-    loadViewer(url);
-  });
-
-  renderRecentList();
-</script>
-
-</body>
-</html>
+      if (!res.ok) throw new Error(`Failed to fetch config.json (HTTP ${res.status})`);
+      const config = await res.
