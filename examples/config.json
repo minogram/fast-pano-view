@@ -3,7 +3,7 @@
   "multiRes": {
     "basePath": "multires",
     "path": "/%l/%s%y_%x",
-    "extension": "jpg",
+    "extension": "png",
     "tileResolution": 512,
     "maxLevel": 4,
     "cubeResolution": 1024
