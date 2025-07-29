@@ -1,24 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Fast Pano Viewer</title>
+  <meta charset="UTF-8" />
+  <title>360 Multi-Res Viewer</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.css" />
   <style>
-    html, body, #panorama {
+    html, body {
       margin: 0;
       height: 100%;
+      font-family: sans-serif;
       background: #000;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+    }
+    #configUrl {
+      width: 400px;
+      padding: 6px;
+      font-size: 14px;
+    }
+    #loadBtn {
+      padding: 6px 10px;
+      font-size: 14px;
+      margin-left: 6px;
+    }
+    #panorama {
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
 
+<div id="controls">
+  <input id="configUrl" type="text" placeholder="Enter config.json URL" />
+  <button id="loadBtn">Load Viewer</button>
+</div>
 <div id="panorama"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/pannellum/build/pannellum.js"></script>
 <script>
-  pannellum.viewer('panorama', 'https://minogram.github.io/fast-pano-view/examples/multires/config.json');
+  let viewer;
+
+  document.getElementById('loadBtn').addEventListener('click', async () => {
+    const url = document.getElementById('configUrl').value.trim();
+    if (!url) {
+      alert("Please enter a valid config.json URL.");
+      return;
+    }
+
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network error or invalid URL');
+
+      const config = await response.json();
+      if (viewer) viewer.destroy();
+
+      viewer = pannellum.viewer('panorama', config);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load config.json. Please check the URL and CORS policy.");
+    }
+  });
+
+  // Optionally, pre-load a default config
+  // window.onload = () => {
+  //   document.getElementById('configUrl').value = 'https://minogram.github.io/fast-pano-view/examples/multires/config.json';
+  //   document.getElementById('loadBtn').click();
+  // };
 </script>
 
 </body>
