@@ -2,7 +2,7 @@
   "type": "multires",
   "multiRes": {
     "basePath": "multires",
-    "path": "/%l/%s%y_%x",
+    "path": "%l/%s%y_%x",
     "extension": "png",
     "tileResolution": 512,
     "maxLevel": 4,
