@@ -3,6 +3,7 @@
   "multiRes": {
     "basePath": "multires",
     "path": "%l/%s%y_%x",
+    "fallbackPath": "fallback/%s",
     "extension": "png",
     "tileResolution": 512,
     "maxLevel": 4,
